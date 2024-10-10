@@ -25,7 +25,7 @@ This project creates a smart pet door that automatically detects your pet, check
 - **Proximity Sensor** (optional as a backup for the RFID tag)
   
 
-3. **Software/Tools**:
+2. **Software/Tools**:
   - **Arduino IDE** (with necessary libraries for Node MCU, BLE, Wi-Fi, and Grove Vision)
   - **Grove AI Vision Library** (or TensorFlow Lite if using a custom vision system)
   - **Android Studio** (for developing the companion Android app)
