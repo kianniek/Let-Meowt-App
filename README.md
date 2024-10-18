@@ -545,6 +545,7 @@ How to fix:
 - [ESP32 Not Connecting via BLE](#esp32-not-connecting-via-ble)
 - [No BLE Devices Found During Scan](#no-ble-devices-found-during-scan)
 
+
 ---
 
 Now that we have created the basic Android project, designed the user interface, and set up initial BLE scanning functionality, you are ready to proceed to the next steps of integrating BLE connection and command sending in the app.
@@ -746,25 +747,25 @@ Now that the system is set up, it’s time to test it and troubleshoot any poten
 
 Here you see the UI of the application that automaticly started scanning for BLE devices in close proximity
 
-![alt text](Images/PhoneScreen.png)
+![Picture of phonescreen showcasing the app](Images/PhoneScreen.png)
 
 We can see our device name in the list
 
-![alt text](Images/DeviceInView.png)
+![Picture of the Let Meowt Device being pressent in the app](Images/DeviceInView.png)
 
 By clicking on it it starts to connect to the device
 
-![alt text](Images/ConnectedToESP.png)
+![Connecting to device text](Images/ConnectedToESP.png)
 
 Clicking the "Open Door" or "Close Door" buttons sends data to the ESP
 
-![alt text](Images/OpenDoor.png)
-![alt text](Images/CloseDoor.png)
+![Open Door button pressed](Images/OpenDoor.png)
+![Close Door button pressed](Images/CloseDoor.png)
 
 Here you see the data that is recieved in the console  by the ESP
 
-![alt text](Images/Arduino_IDE_Console.png)
-![alt text](Images/ConsoleComments.png)
+![Serial Monitor showing the output of the ESP](Images/Arduino_IDE_Console.png)
+![Comments of the data recieved in the console](Images/ConsoleComments.png)
 
 ---
 
