@@ -1,13 +1,24 @@
 # Connecting an ESP32 to an Android App via BLE (Bluetooth Low Energy): Let Meowt Door opening solution when the user comes close to the door
 
 ## Table of Contents
-1. [Introduction](#Introduction)
-2. [Prerequisites](#Prerequisites)
-3. [Setting Up the Arduino IDE](#setting-up-the-arduino-ide)
-4. [Programming the ESP32](#programming-the-esp32)
-5. [Setting Up the Android App](#setting-up-the-android-app)
-6. [Running the System](#running-the-system)
-7. [Troubleshooting](#troubleshooting)
+1. [Introduction](#introduction)
+2. [Prerequisites](#prerequisites)
+   - [Hardware](#hardware)
+   - [Software](#software)
+   - [Knowledge Requirements](#knowledge-requirements)
+3. [Setting Up the Arduino IDE for ESP32](#step-1-setting-up-the-arduino-ide-for-esp32)
+4. [Understanding and writing the ESP32 Code](#step-2-understanding-and-writing-the-esp32-code)
+5. [Setting Up the Android App](#step-3-setting-up-the-android-app)
+6. [integrating BLE connection and command sending in the app](#4-integrating-ble-connection-and-command-sending-in-the-app-android-studio)
+7. [Testing](#step-6-testing-and-troubleshooting)
+8. [Troubleshooting](#Troubleshooting-Guide)
+   - [ESP32 Not Connecting via BLE](#esp32-not-connecting-via-ble)
+   - [No BLE Devices Found During Scan](#no-ble-devices-found-during-scan)
+   - [Android App Crashes on Startup](#android-app-crashes-on-startup)
+   - [Commands Not Executing on ESP32](#commands-not-executing-on-esp32)
+   - [BLE Connection is Dropping](#ble-connection-is-dropping)
+   - [ESP32 Not Responding to Android Commands](#esp32-not-responding-to-android-commands)
+   - [Bluetooth Permissions Issues on Android](#bluetooth-permissions-issues-on-android)
 
 ---
 
@@ -727,6 +738,64 @@ Now that the system is set up, it’s time to test it and troubleshoot any poten
 2. Open the app and press the **Scan** button to search for nearby BLE devices.
 3. Select the ESP32 from the list of available devices.
 4. Press **Connect** and then try the **Open Door** and **Lock Door** buttons to test the functionality.
+
+---
+
+### Troubleshooting Guide
+
+#### ESP32 Not Connecting via BLE
+   - **Cause**: BLE may not be initialized properly or the device is not discoverable.
+   - **Solution**: 
+     - Ensure `BLEDevice::init()` is called in the `setup()` function to initialize BLE.
+     - If the device fails to connect after disconnection, call `BLEDevice::startAdvertising()` again to re-enable BLE advertising.
+     - Verify that the BLE service and characteristic UUIDs match those expected by the Android app.
+
+#### No BLE Devices Found During Scan
+   - **Cause**: Insufficient permissions or disabled Bluetooth on the phone.
+   - **Solution**: 
+     - Ensure that Bluetooth is turned on in the phone’s settings.
+     - Check that the app has the necessary permissions:
+       - **BLUETOOTH** and **BLUETOOTH_ADMIN** permissions for scanning.
+       - **ACCESS_FINE_LOCATION** to access BLE.
+     - You can check for missing permissions in the Android log (logcat) and add them in `AndroidManifest.xml`.
+     - Ensure that BLE scanning starts after permissions are granted. Use `ActivityCompat.requestPermissions()` if permissions are not granted by default.
+
+#### Android App Crashes on Startup
+   - **Cause**: Kotlin dependencies or incorrect configuration in Android Studio.
+   - **Solution**: 
+     - Make sure the Kotlin Gradle plugin is correctly set up in `build.gradle`.
+     - Update dependencies in `build.gradle` (app-level) to ensure the correct versions of `kotlin-stdlib`, `androidx`, and Bluetooth libraries are used.
+     - Ensure that you handle all required lifecycle events and runtime permissions.
+     - If the crash is related to BLE or permissions, examine the crash log in Android Studio to determine the specific cause (e.g., `NullPointerException` or unhandled BLE callbacks).
+
+#### Commands Not Executing on ESP32
+   - **Cause**: The UUIDs for BLE characteristics might be incorrect, or the characteristic callback function isn't set up properly.
+   - **Solution**:
+     - Double-check the characteristic UUIDs in both the ESP32 and Android code to ensure they match.
+     - Ensure that the characteristic write permissions are enabled on the ESP32.
+     - The callback function on the ESP32 needs to properly handle the incoming data. For example, the `onWrite()` function should parse and execute the correct command from the Android app.
+     - Test the BLE communication using a Bluetooth scanning tool like **nRF Connect** to ensure that the ESP32 is receiving and responding to commands correctly.
+
+#### BLE Connection is Dropping
+   - **Cause**: Connection instability due to signal interference or power-saving settings.
+   - **Solution**:
+     - Ensure the ESP32 is running a stable power supply.
+     - Decrease the connection interval or increase the supervision timeout in your BLE configuration on the ESP32 to allow for a more stable connection.
+     - Move the Android device closer to the ESP32 to avoid signal interference.
+     - Disable any power-saving features on the Android device that might interfere with the BLE connection.
+
+#### ESP32 Device Not Responding to Android App Commands
+   - **Cause**: Miscommunication or incorrect setup of the BLE server on the ESP32.
+   - **Solution**:
+     - Check that the BLE service and characteristic UUIDs in the ESP32 match those in the Android app code.
+     - Ensure the ESP32 is correctly parsing and responding to commands sent via BLE. Add debug logs in the ESP32 code to verify that commands are being received.
+     - Use a BLE debugging tool like **nRF Connect** to inspect the BLE characteristics and ensure data is being transferred correctly.
+
+#### Failure to Open Bluetooth Settings or Permissions Issues on Android
+   - **Cause**: Permissions or Intent handling not implemented correctly.
+   - **Solution**:
+     - Check that Bluetooth permissions are requested before any BLE operations are started. Use `ActivityCompat.requestPermissions()` in the Android app to prompt the user for permissions.
+     - Ensure that the correct `Intent` is being used to open Bluetooth settings when necessary. For example, use `startActivityForResult()` to open the Bluetooth settings page if Bluetooth is disabled.
 
 ---
 
