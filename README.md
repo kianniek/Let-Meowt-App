@@ -1,8 +1,8 @@
 # Connecting an ESP32 to an Android App via BLE: Let Meowt Door opening solution when the user comes close to the door
 
 ## Table of Contents
-1. [Introduction](#introduction)
-2. [Prerequisites](#prerequisites)
+1. [Introduction](#Introduction)
+2. [Prerequisites](#Prerequisites)
 3. [Setting Up the Arduino IDE](#setting-up-the-arduino-ide)
 4. [Programming the ESP32](#programming-the-esp32)
 5. [Setting Up the Android App](#setting-up-the-android-app)
@@ -18,6 +18,71 @@
 #### **Introduction**
 
 This detailed guide will walk you through the process of building an IoT system using an ESP32 microcontroller with Bluetooth Low Energy (BLE) capabilities, and an Android app to control it. This system can be used to perform tasks like opening or locking a door remotely. This manual is designed for users with basic coding knowledge, and it not only provides step-by-step instructions but also explains why each step is necessary, ensuring a deeper understanding of the project.
+
+---
+## **Prerequisites**
+
+Before you begin building the **Let Meowt Door Opening Solution**, ensure you have the following hardware, software, and resources in place. This project combines ESP32 microcontroller programming with Android app development, so you’ll need tools for both platforms.
+
+### **Hardware**
+
+1. **ESP32 Microcontroller**
+   - You’ll need an ESP32 board with Bluetooth Low Energy (BLE) capabilities. ESP32 Dev Kits are widely available, such as the ESP32 Dev Module or similar models.
+   
+2. **USB Cable**
+   - A USB cable (usually Micro-USB) to connect your ESP32 board to your computer for uploading code.
+
+3. **Android Smartphone**
+   - An Android smartphone running **Android 5.0 (Lollipop)** or above. This phone will be used to run the custom Android app you’ll develop, which will communicate with the ESP32 via BLE.
+
+4. **Power Supply for the ESP32**
+   - A 5V power supply to power your ESP32 when it’s deployed. If you’re testing, the ESP32 can be powered via USB.
+
+5. **Door Mechanism (Optional)**
+   - If you want to physically control a door, you will need additional hardware such as:
+     - **Servo Motor** or **Relay Module**: To control the locking mechanism.
+     - **Power source** and necessary connectors for the motor or relay.
+     - A door lock mechanism, if you plan to automate an actual door.
+
+### **Software**
+
+1. **Arduino IDE**
+   - Download and install the Arduino IDE to write and upload code to your ESP32. This is available for Windows, macOS, and Linux platforms.  
+   [Download Arduino IDE](https://www.arduino.cc/en/software)
+
+2. **ESP32 Board Support for Arduino IDE**
+   - You will need to install the ESP32 board package in the Arduino IDE to program the ESP32. Instructions for setting this up are provided in the "Setting Up the Arduino IDE" section.
+
+3. **Android Studio**
+   - Install Android Studio, which is required to build and run the Android app on your smartphone.  
+   [Download Android Studio](https://developer.android.com/studio)
+
+4. **Bluetooth LE-capable Android Phone**
+   - Ensure your Android device supports Bluetooth Low Energy (BLE), which is required for communicating with the ESP32.
+
+5. **Serial Monitor Tool (Optional)**
+   - A tool for debugging the ESP32 via USB, such as the Serial Monitor integrated within the Arduino IDE.
+
+### **Knowledge Requirements**
+
+1. **Basic Programming Knowledge**
+   - Familiarity with Arduino programming (C/C++) is recommended. You should be comfortable with writing or modifying Arduino sketches to control the ESP32.
+   - Basic understanding of Android development in **Kotlin** or **Java** is required to create the Android app and implement BLE functionality.
+
+2. **Bluetooth Low Energy (BLE) Basics**
+   - A general understanding of BLE communication (how devices discover, connect, and exchange data) will be useful but not strictly necessary. This guide explains key concepts in detail.
+
+3. **Wiring and Electronics (Optional)**
+   - If you plan to connect your ESP32 to physical hardware like servos or relays to open/close a door, you’ll need to know how to wire these components properly.
+
+### **Libraries and Dependencies**
+
+1. **ESP32 BLE Arduino Library**
+   - This library provides BLE support for the ESP32. It should be installed via the Arduino IDE’s Library Manager.
+   Instructions for installing this library will be provided in the **Arduino IDE Setup** section.
+
+2. **Kotlin for Android Studio**
+   - The Android app will be written in **Kotlin**, so ensure that Kotlin is set up in Android Studio. This is usually pre-configured, but you can verify by going to **File** > **Project Structure** > **Modules** and checking the language settings.
 
 ---
 
