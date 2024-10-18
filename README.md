@@ -738,6 +738,33 @@ Now that the system is set up, it’s time to test it and troubleshoot any poten
 
 ---
 
+## **How the application works after following the steps**
+
+Here you see the UI of the application that automaticly started scanning for BLE devices in close proximity
+
+![alt text](Images/PhoneScreen.png)
+
+We can see our device name in the list
+
+![alt text](Images/DeviceInView.png)
+
+By clicking on it it starts to connect to the device
+
+![alt text](Images/ConnectedToESP.png)
+
+Clicking the "Open Door" or "Close Door" buttons sends data to the ESP
+
+![alt text](Images/OpenDoor.png)
+![alt text](Images/CloseDoor.png)
+
+Here you see the data that is recieved in the console  by the ESP
+
+![alt text](Images/Arduino_IDE_Console.png)
+![alt text](Images/ConsoleComments.png)
+
+
+---
+
 ## Troubleshooting Guide
 
 #### ESP32 Not Connecting via BLE
