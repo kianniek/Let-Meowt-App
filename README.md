@@ -541,6 +541,10 @@ class MainActivity : AppCompatActivity() {
 > **Why This Step?**  
 > This sets up the basic Bluetooth functionality for scanning and interacting with BLE devices like the ESP32. By initializing Bluetooth and setting up a scan, you’re preparing the app to discover and connect to nearby BLE devices.
 
+How to fix: 
+- [ESP32 Not Connecting via BLE](#esp32-not-connecting-via-ble)
+- [No BLE Devices Found During Scan](#no-ble-devices-found-during-scan)
+
 ---
 
 Now that we have created the basic Android project, designed the user interface, and set up initial BLE scanning functionality, you are ready to proceed to the next steps of integrating BLE connection and command sending in the app.
@@ -761,7 +765,6 @@ Here you see the data that is recieved in the console  by the ESP
 
 ![alt text](Images/Arduino_IDE_Console.png)
 ![alt text](Images/ConsoleComments.png)
-
 
 ---
 
