@@ -1,4 +1,5 @@
 # Connecting an ESP32 to an Android App via BLE (Bluetooth Low Energy): Let Meowt Door opening solution when the user comes close to the door
+### **Manual for IoT Solution: Connecting a BLE ESP32 to an Android App**
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -19,10 +20,6 @@
    - [BLE Connection is Dropping](#ble-connection-is-dropping)
    - [ESP32 Not Responding to Android Commands](#esp32-not-responding-to-android-commands)
    - [Bluetooth Permissions Issues on Android](#bluetooth-permissions-issues-on-android)
-
----
-
-### **Manual for IoT Solution: Connecting a BLE ESP32 to an Android App**
 
 ---
 
