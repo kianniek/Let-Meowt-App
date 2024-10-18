@@ -1,4 +1,4 @@
-# Connecting an ESP32 to an Android App via BLE: Let Meowt Door opening solution when the user comes close to the door
+# Connecting an ESP32 to an Android App via BLE (Bluetooth Low Energy): Let Meowt Door opening solution when the user comes close to the door
 
 ## Table of Contents
 1. [Introduction](#Introduction)
@@ -15,7 +15,7 @@
 
 ---
 
-#### **Introduction**
+## **Introduction**
 
 This detailed guide will walk you through the process of building an IoT system using an ESP32 microcontroller with Bluetooth Low Energy (BLE) capabilities, and an Android app to control it. This system can be used to perform tasks like opening or locking a door remotely. This manual is designed for users with basic coding knowledge, and it not only provides step-by-step instructions but also explains why each step is necessary, ensuring a deeper understanding of the project.
 
@@ -336,9 +336,205 @@ void loop() {
 ---
 ## **Step 3: Setting Up the Android App**
 
-This section focuses on how to set up the Android app that will connect to the ESP32 via BLE. We’ll go over the key files involved, explaining the code and its purpose in the context of scanning for devices, connecting to the ESP32, and sending commands (like opening and closing a door).
+In this section, we will go over how to set up an Android app in Android Studio that will serve as the interface to communicate with the ESP32 via Bluetooth Low Energy (BLE). This app will allow users to scan for BLE devices, connect to the ESP32, and send commands to open or close the door.
 
-### **3.1 Main Activity (MainActivity.kt)**
+### **3.1 Creating a New Android Project in Android Studio**
+
+Before diving into the code, let’s start by creating a new project in Android Studio.
+
+#### **Step 3.1.1: Open Android Studio**
+
+1. Launch **Android Studio** on your computer.
+   
+   If you haven’t installed it yet, you can download it from [here](https://developer.android.com/studio).
+
+#### **Step 3.1.2: Create a New Project**
+
+1. On the welcome screen, click on **New Project**.
+
+   ![Android Studio New Project](link)
+
+#### **Step 3.1.3: Select an Empty Activity**
+
+1. In the **Select a Project Template** window, choose **Empty Activity**.  
+   This creates a basic project with a single screen (activity) where we’ll build the app’s functionality.
+   
+   ![Select Empty Activity in Android Studio](link)
+
+2. Click **Next** to proceed.
+
+#### **Step 3.1.4: Configure Your Project**
+
+1. On the **Configure Your Project** screen, enter the following details:
+   - **Name**: `LetMeowtApp`  
+     This will be the name of your project and the resulting Android app.
+   - **Package Name**: This is automatically generated but can be changed to match your organization (e.g., `com.example.letmeowtapp`).
+   - **Save Location**: Choose a directory where you want to store your project files.
+   - **Language**: Select **Kotlin** (preferred for modern Android apps).
+   - **Minimum API Level**: Select **API 21: Android 5.0 (Lollipop)** or higher to ensure BLE support.
+
+   ![Configure Project in Android Studio](link)
+
+2. Click **Finish** to create your new project.
+
+Android Studio will now create an empty project with the basic structure for an Android app.
+
+---
+
+### **3.2 Exploring the Project Structure**
+
+After the project is created, Android Studio will generate several files and folders for you. Here are the key components of the project:
+
+1. **MainActivity.kt**  
+   Located under `app > java > com.example.letmeowtapp`. This file is the entry point of your app, where you will add the logic to scan for BLE devices, connect to the ESP32, and send commands.
+
+2. **activity_main.xml**  
+   Located under `app > res > layout`. This XML file defines the layout of the main screen of your app. Here, you will define buttons and views to display devices and interact with the ESP32.
+
+---
+
+### **3.3 Setting Up the User Interface (UI)**
+
+We will now modify the `activity_main.xml` file to include buttons and a RecyclerView that will allow users to scan for and select BLE devices.
+
+#### **Modifying `activity_main.xml`**
+
+Open the **activity_main.xml** file in Android Studio’s layout editor.
+
+1. Replace the existing layout with the following XML code to set up a button for scanning devices and a list (RecyclerView) to display the discovered BLE devices:
+
+```xml
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Scan Button -->
+    <Button
+        android:id="@+id/btnScan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Scan for BLE Devices" />
+
+    <!-- RecyclerView for listing BLE devices -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvDevices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" />
+
+</LinearLayout>
+```
+
+- **Button**: This is the scan button that the user will press to initiate the BLE device scan.
+- **RecyclerView**: This is where the list of discovered BLE devices will be displayed after scanning.
+
+> **Why This Step?**  
+> The user interface is crucial to making the app interactive. Buttons like "Scan for BLE Devices" and the list of available devices allow users to interact with the ESP32 easily.
+
+---
+
+### **3.4 Adding BLE Permissions**
+
+To interact with Bluetooth, the app needs the proper permissions. These permissions must be declared in the **AndroidManifest.xml** file.
+
+1. Open the **AndroidManifest.xml** file located under `app > manifests`.
+
+2. Add the following permissions to the file just above the `<application>` tag:
+
+```xml
+<uses-permission android:name="android.permission.BLUETOOTH" />
+<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+```
+
+- **BLUETOOTH**: Required for using basic Bluetooth features.
+- **BLUETOOTH_ADMIN**: Allows the app to initiate device discovery.
+- **ACCESS_FINE_LOCATION**: Required for discovering BLE devices since BLE scans are considered a location-based activity on Android.
+
+> **Why This Step?**  
+> Without these permissions, the app won’t be able to scan for BLE devices, and Android will block Bluetooth-related functionality. Always ensure the necessary permissions are declared.
+
+---
+
+### **3.5 Implementing Bluetooth Functionality**
+
+Next, we will modify **MainActivity.kt** to implement the functionality for scanning, connecting, and sending commands to BLE devices.
+
+#### **Step 1: Initialize Bluetooth in MainActivity**
+
+1. Open the **MainActivity.kt** file in the `java > com.example.letmeowtapp` directory.
+
+2. Add the following code to initialize Bluetooth and handle the BLE scanning and connection logic.
+
+```kotlin
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.BluetoothProfile
+import android.bluetooth.BluetoothManager
+import android.content.Context
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.widget.Button
+import androidx.recyclerview.widget.RecyclerView
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var bluetoothAdapter: BluetoothAdapter
+    private lateinit var btnScan: Button
+    private lateinit var rvDevices: RecyclerView
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        // Initialize Bluetooth Adapter
+        val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        bluetoothAdapter = bluetoothManager.adapter
+
+        // Initialize UI elements
+        btnScan = findViewById(R.id.btnScan)
+        rvDevices = findViewById(R.id.rvDevices)
+
+        // Set up scan button listener
+        btnScan.setOnClickListener {
+            scanForDevices()
+        }
+    }
+
+    // Function to scan for BLE devices
+    private fun scanForDevices() {
+        bluetoothAdapter.startLeScan(leScanCallback)
+    }
+
+    // Callback to handle discovered devices
+    private val leScanCallback = BluetoothAdapter.LeScanCallback { device, _, _ ->
+        if (device.name != null) {
+            // Add devices to a list (you'll add more here later)
+        }
+    }
+}
+```
+
+- **BluetoothAdapter**: This handles all Bluetooth operations, including scanning and connecting.
+- **scanForDevices()**: This function initiates a BLE scan when the user presses the "Scan" button.
+- **leScanCallback**: This callback handles each discovered BLE device, and you’ll later update this code to display devices in the RecyclerView.
+
+> **Why This Step?**  
+> This sets up the basic Bluetooth functionality for scanning and interacting with BLE devices like the ESP32. By initializing Bluetooth and setting up a scan, you’re preparing the app to discover and connect to nearby BLE devices.
+
+---
+
+Now that we have created the basic Android project, designed the user interface, and set up initial BLE scanning functionality, you are ready to proceed to the next steps of integrating BLE connection and command sending in the app.
+
+
+### **4 integrating BLE connection and command sending in the app (Android Studio)**
+
+### **4.1 Main Activity (MainActivity.kt)**
 
 The **MainActivity** is the main entry point for the app and handles BLE scanning, connection, and interaction with the ESP32. Let’s break down each function:
 
