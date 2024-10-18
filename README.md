@@ -549,7 +549,7 @@ class MainActivity : AppCompatActivity() {
 Now that we have created the basic Android project, designed the user interface, and set up initial BLE scanning functionality, you are ready to proceed to the next steps of integrating BLE connection and command sending in the app.
 
 
-### **4 integrating BLE connection and command sending in the app (Android Studio)**
+## **4 integrating BLE connection and command sending in the app (Android Studio)**
 
 ### **4.1 Main Activity (MainActivity.kt)**
 
@@ -650,7 +650,7 @@ val gattCallback = object : BluetoothGattCallback() {
 
 ---
 
-### **3.2 Sending Commands to the ESP32**
+### **4.2 Sending Commands to the ESP32**
 
 Once connected, the Android app needs to send commands to the ESP32 to control the door. This is done by writing values to a characteristic on the BLE device.
 
@@ -685,7 +685,7 @@ override fun onCharacteristicChanged(gatt: BluetoothGatt?, characteristic: Bluet
 
 ---
 
-### **3.3 User Interface (activity_main.xml)**
+### **4.3 User Interface (activity_main.xml)**
 
 The user interface (UI) for the Android app is defined in the **activity_main.xml** layout file. This layout includes buttons and views for scanning devices, connecting, and sending commands.
 
@@ -721,18 +721,18 @@ The RecyclerView displays the list of discovered BLE devices that the user can s
 > The UI provides an easy way for users to interact with the app—scanning for devices, selecting the ESP32, and sending commands are all intuitive and accessible via buttons and the device list.
 
 ---
-### **Step 6: Testing and Troubleshooting**
+## **Step 5: Testing and Troubleshooting**
 
 Now that the system is set up, it’s time to test it and troubleshoot any potential issues.
 
-#### **6.1 Upload Code to ESP32**
+#### **5.1 Upload Code to ESP32**
 
 1. Open **Server.ino** in the Arduino IDE.
 2. Make sure the correct board is selected (**Tools** > **Board** > **ESP32 Dev Module**).
 3. Connect the ESP32 to your computer via USB.
 4. Press the **Upload** button to upload the code to the ESP32.
 
-#### **6.2 Install the Android App**
+#### **5.2 Install the Android App**
 
 1. Build the Android app in Android Studio and install it on your Android device.
 2. Open the app and press the **Scan** button to search for nearby BLE devices.
@@ -741,7 +741,7 @@ Now that the system is set up, it’s time to test it and troubleshoot any poten
 
 ---
 
-### Troubleshooting Guide
+## Troubleshooting Guide
 
 #### ESP32 Not Connecting via BLE
    - **Cause**: BLE may not be initialized properly or the device is not discoverable.
