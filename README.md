@@ -108,7 +108,7 @@ The ESP32 is not supported by Arduino by default, so we need to add support for 
    
    This URL tells the Arduino IDE where to find the package needed to program ESP32 devices.
 
-   ![Preferences Window showing where to add ESP32 URL](link)
+   ![Preferences Window showing where to add ESP32 URL](ArduinoAdditionBoardsURL.png)
 
 4. After adding the URL, click **OK** to close the window.
 
@@ -119,7 +119,7 @@ Next, we need to download and install the actual board files for ESP32.
 1. Go to **Tools** > **Board** > **Boards Manager**.  
    This opens the board manager, where you can search and install new boards.
    
-   ![Boards Manager in Arduino IDE](link)
+   ![Boards Manager in Arduino IDE](BoardsManager.png)
 
 2. In the Boards Manager window, type "ESP32" into the search bar.
 3. Select the "ESP32 by Espressif Systems" entry and click **Install**.
@@ -147,6 +147,8 @@ The code running on the ESP32 is critical for establishing the BLE communication
 To not have to write everything manually we are going to be using an existing sketch and modifiying it to make it work with our android app we are yet to make
 
 1. Go to **File** > **Examples** > **BLE** > **Server** this will load the "Server.ino" example file with all the code for our ESP32 to work as an BLE server and be detectable for other devices
+
+![Path to server.ino](ExampleSketch.png)
 
 #### **2.1 Setting Up the BLE Server (Server.ino)**
 
@@ -352,14 +354,14 @@ Before diving into the code, let’s start by creating a new project in Android 
 
 1. On the welcome screen, click on **New Project**.
 
-   ![Android Studio New Project](link)
+   ![Android Studio New Project](NewProject.png)
 
 #### **Step 3.1.3: Select an Empty Activity**
 
 1. In the **Select a Project Template** window, choose **Empty Activity**.  
    This creates a basic project with a single screen (activity) where we’ll build the app’s functionality.
    
-   ![Select Empty Activity in Android Studio](link)
+   ![Select Empty Activity in Android Studio](EmtthyActivity.png)
 
 2. Click **Next** to proceed.
 
@@ -373,7 +375,7 @@ Before diving into the code, let’s start by creating a new project in Android 
    - **Language**: Select **Kotlin** (preferred for modern Android apps).
    - **Minimum API Level**: Select **API 21: Android 5.0 (Lollipop)** or higher to ensure BLE support.
 
-   ![Configure Project in Android Studio](link)
+   ![Configure Project in Android Studio](ProjectSetup.png)
 
 2. Click **Finish** to create your new project.
 
@@ -433,6 +435,10 @@ Open the **activity_main.xml** file in Android Studio’s layout editor.
 
 > **Why This Step?**  
 > The user interface is crucial to making the app interactive. Buttons like "Scan for BLE Devices" and the list of available devices allow users to interact with the ESP32 easily.
+
+The UI should now look something like this
+
+![Image of the UI](UI.png)
 
 ---
 
