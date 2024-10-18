@@ -269,51 +269,151 @@ void loop() {
 ```
 
 ---
+## **Step 3: Setting Up the Android App**
 
-### **Step 3: Building the Android App**
+This section focuses on how to set up the Android app that will connect to the ESP32 via BLE. We’ll go over the key files involved, explaining the code and its purpose in the context of scanning for devices, connecting to the ESP32, and sending commands (like opening and closing a door).
 
-On the Android side, the app is responsible for finding BLE devices, connecting to the ESP32, and sending commands like "Open Door" or "Lock Door." Let’s explore the main parts of the Android app in detail.
+### **3.1 Main Activity (MainActivity.kt)**
 
-#### **3.1 Main Activity (MainActivity.kt)**
+The **MainActivity** is the main entry point for the app and handles BLE scanning, connection, and interaction with the ESP32. Let’s break down each function:
 
-The **MainActivity** is the central hub of your app. It’s responsible for scanning BLE devices and initiating connections. Here’s a breakdown of key components in this file:
+#### **Initializing Bluetooth**
+
+Before you can scan for devices, you need to ensure that Bluetooth is enabled on the device. This code snippet checks whether Bluetooth is available and prompts the user to enable it if necessary.
 
 ```kotlin
-fun scanForDevices() {
-    // Start scanning for BLE devices
-    bluetoothAdapter?.startLeScan(leScanCallback)
+val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
+
+if (bluetoothAdapter == null) {
+    // Device doesn't support Bluetooth
+    Toast.makeText(this, "Bluetooth is not available on this device.", Toast.LENGTH_SHORT).show()
+    finish()
+} else if (!bluetoothAdapter.isEnabled) {
+    // Bluetooth is not enabled, prompt user to enable it
+    val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
 }
 ```
 
-- **startLeScan()**: This function initiates a BLE scan. It tells the app to search for nearby BLE devices, such as the ESP32 running the BLE server we set up earlier.
+- **BluetoothAdapter.getDefaultAdapter()**: This retrieves the Bluetooth adapter of the device.
+- **isEnabled**: Checks if Bluetooth is enabled, and if not, prompts the user to enable it.
 
 > **Why This Step?**  
-> Scanning is the first step in discovering the ESP32. The Android app needs to find the BLE server before it can communicate with it. This scan will display available devices to the user.
+> The app cannot perform BLE scanning or connect to the ESP32 unless Bluetooth is enabled on the device. This ensures that the necessary permissions and hardware are in place.
 
-#### **3.2 Handling Scan Results**
+#### **Scanning for BLE Devices**
 
-Once the scan is complete, the app displays the available devices for the user to select. The scan results are handled by a callback function.
+Once Bluetooth is enabled, the app can begin scanning for nearby BLE devices. The following code initiates the BLE scan:
+
+```kotlin
+fun scanForDevices() {
+    bluetoothAdapter?.startLeScan(leScanCallback)  // Start scanning for BLE devices
+}
+```
+
+- **startLeScan()**: This function starts scanning for nearby BLE devices. It will trigger a callback whenever a device is found.
+
+The scan results are handled by the **leScanCallback** function, which processes each BLE device discovered and adds it to a list.
 
 ```kotlin
 val leScanCallback = BluetoothAdapter.LeScanCallback { device, _, _ ->
     // Add discovered device to a list
     if (device.name != null) {
         devicesList.add(device)
-        deviceAdapter.notifyDataSetChanged()
+        deviceAdapter.notifyDataSetChanged()  // Update the UI with the new list of devices
     }
 }
 ```
 
-- **leScanCallback**: This callback is triggered whenever a BLE device is found. If the device has a name (like "ESP32_Door_Lock"), it gets added to a list that is shown to the user.
+- **device.name**: The name of the discovered BLE device (e.g., "Let_Meowt_Door").
+- **devicesList.add()**: Adds the device to a list that will be displayed to the user.
+- **notifyDataSetChanged()**: Updates the list view to display the discovered devices.
 
 > **Why This Step?**  
-> The user needs to see a list of available BLE devices to choose the correct one. The callback ensures that every discovered device is added to this list, which is then shown on the app's interface.
+> Scanning is essential for discovering BLE devices in the vicinity. This function gathers the available devices (like your ESP32) and shows them in a list for the user to select.
+
+#### **Connecting to the ESP32**
+
+Once a user selects a device from the list of discovered BLE devices, the app establishes a connection with the ESP32. Here’s how to handle the connection:
+
+```kotlin
+fun connectToDevice(device: BluetoothDevice) {
+    val gatt = device.connectGatt(this, false, gattCallback)  // Connect to the BLE device
+}
+```
+
+- **connectGatt()**: This function initiates a connection to the selected BLE device (ESP32) using the GATT (Generic Attribute Profile) protocol.
+
+The **gattCallback** will handle various connection events, such as when the connection is established or disconnected.
+
+```kotlin
+val gattCallback = object : BluetoothGattCallback() {
+    override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
+        if (newState == BluetoothProfile.STATE_CONNECTED) {
+            // Successfully connected to the ESP32
+            gatt?.discoverServices()  // Discover services offered by the ESP32
+        }
+    }
+
+    override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
+        // Services discovered, ready to communicate with the ESP32
+        val service = gatt?.getService(UUID.fromString(SERVICE_UUID))
+        val characteristic = service?.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID))
+    }
+}
+```
+
+- **onConnectionStateChange()**: This function is called when the connection status changes. If the connection is successful, the app proceeds to discover the services offered by the ESP32.
+- **discoverServices()**: This function looks for the services available on the connected device (ESP32).
+- **getService()** and **getCharacteristic()**: These functions retrieve the specific service and characteristic that the Android app will communicate with.
+
+> **Why This Step?**  
+> The connection process is crucial to enabling communication between the Android app and the ESP32. Once connected, the app can send commands (such as "Open Door") to the ESP32.
 
 ---
 
-#### **3.3 Managing the User Interface (activity_main.xml)**
+### **3.2 Sending Commands to the ESP32**
 
-The user interface (UI) of the Android app is defined in **activity_main.xml**. This file contains all the buttons and lists that the user interacts with.
+Once connected, the Android app needs to send commands to the ESP32 to control the door. This is done by writing values to a characteristic on the BLE device.
+
+```kotlin
+fun sendCommand(command: String) {
+    // Write the command to the BLE characteristic
+    characteristic.setValue(command.toByteArray())  // Convert the string command to bytes
+    bluetoothGatt.writeCharacteristic(characteristic)  // Write the characteristic
+}
+```
+
+- **setValue()**: This function sets the command (like "Open" or "Close") as the value of the BLE characteristic.
+- **writeCharacteristic()**: This sends the value (command) to the ESP32, where it will be processed and executed (e.g., opening or closing the door).
+
+#### **Handling the Response**
+
+When the ESP32 processes the command, it may send a response back to the Android app. Here’s how to handle incoming data:
+
+```kotlin
+override fun onCharacteristicChanged(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?) {
+    val response = characteristic?.getStringValue(0)  // Read the response from the ESP32
+    runOnUiThread {
+        Toast.makeText(this@MainActivity, "Response from ESP32: $response", Toast.LENGTH_SHORT).show()
+    }
+}
+```
+
+- **onCharacteristicChanged()**: This function is called when the ESP32 sends a response. It retrieves the response value and displays it to the user via a **Toast** message.
+
+> **Why This Step?**  
+> Sending and receiving data between the Android app and the ESP32 is the core of the system’s functionality. The app sends commands (like "Open" or "Close"), and the ESP32 executes those actions and may send feedback to the app.
+
+---
+
+### **3.3 User Interface (activity_main.xml)**
+
+The user interface (UI) for the Android app is defined in the **activity_main.xml** layout file. This layout includes buttons and views for scanning devices, connecting, and sending commands.
+
+#### **Scan Button**
+
+The scan button starts the BLE scan when pressed:
 
 ```xml
 <Button
@@ -323,9 +423,11 @@ The user interface (UI) of the Android app is defined in **activity_main.xml**. 
     android:text="Scan" />
 ```
 
-- **btnScan**: This button starts the scanning process when pressed. When the user clicks this, the app searches for nearby BLE devices, like the ESP32.
+- **btnScan**: This button triggers the scanning function, allowing the app to search for nearby BLE devices like the ESP32.
 
-- **RecyclerView (rvDevices)**: The RecyclerView is used to display a list of available BLE devices found during the scan.
+#### **Device List (RecyclerView)**
+
+The RecyclerView displays the list of discovered BLE devices that the user can select to connect:
 
 ```xml
 <androidx.recyclerview.widget.RecyclerView
@@ -335,47 +437,12 @@ The user interface (UI) of the Android app is defined in **activity_main.xml**. 
     android:layout_weight="1" />
 ```
 
-> **Why This Step?
-
-**  
-> The UI is essential for user interaction. Buttons like "Scan," "Connect," "Open Door," and "Lock Door" allow the user to control the ESP32. The RecyclerView lists available BLE devices for easy selection.
-
----
-
-### **Step 4: Connecting the Android App to ESP32**
-
-After the user selects the ESP32 from the list of available devices, the app establishes a connection to the ESP32’s BLE server.
-
-```kotlin
-fun connectToDevice(device: BluetoothDevice) {
-    val gatt = device.connectGatt(this, false, gattCallback)
-}
-```
-
-- **connectGatt()**: This function initiates the connection to the selected BLE device. It establishes the communication link between the app and the ESP32 BLE server.
-
----
-
-### **Step 5: Sending Commands to the ESP32**
-
-Once connected, the app can send commands to the ESP32 to either open or lock the door.
-
-```kotlin
-fun sendCommand(command: String) {
-    // Write the command to the BLE characteristic
-    characteristic.setValue(command.toByteArray())
-    bluetoothGatt.writeCharacteristic(characteristic)
-}
-```
-
-- **setValue()**: This function sets the command (like "open" or "lock") as the value of the BLE characteristic.
-- **writeCharacteristic()**: This sends the value to the ESP32, where it is processed to perform the action (e.g., opening the door).
+- **RecyclerView**: This component lists all the BLE devices found during the scan.
 
 > **Why This Step?**  
-> Sending commands is the main purpose of the IoT system. The app translates user actions (pressing "Open Door" or "Lock Door") into BLE commands, which the ESP32 interprets and executes.
+> The UI provides an easy way for users to interact with the app—scanning for devices, selecting the ESP32, and sending commands are all intuitive and accessible via buttons and the device list.
 
 ---
-
 ### **Step 6: Testing and Troubleshooting**
 
 Now that the system is set up, it’s time to test it and troubleshoot any potential issues.
